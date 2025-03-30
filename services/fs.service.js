@@ -15,7 +15,7 @@ const read = async () => {
 }
 const write = async (users) => {
     try {
-        await fs.writeFile(filePath, JSON.stringify(users));
+        await fs.writeFile(filePath, JSON.stringify(users, null, 2));
     } catch (e) {
         console.log ('Error', e.message);
     }

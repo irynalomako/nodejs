@@ -19,4 +19,28 @@ class UserRepository {
         await write(users);
         return newUser
     }
+    async getById (id) {
+        const users = await read();
+        const index = users.findIndex(user => user.id === Number (id));
+        return users[index]
+    }
+    //щоб оновити по айді спочатку робимо пошук по айді
+    async updateById (id, user) {
+        const users = await read();
+        const index = users.findIndex(user => user.id === Number(id));
+        user.id = id;
+        users[index] = users;
+        await write (users);
+        return user
+    }
+    async deleteById (id) {
+        const users = await read();
+        const index = users.findIndex(user => user.id === Number(id));
+        users.splice(index, 1);
+        await write (users)
+    }
 }
+const userRepository = new UserRepository(); //створюємо і експортуємо новий екземпляр класу
+module.exports = {
+    userRepository
+};
