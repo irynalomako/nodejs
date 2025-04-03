@@ -3,6 +3,7 @@ import tsParser from "@typescript-eslint/parser";
 import tsPlugin from "@typescript-eslint/eslint-plugin";
 import prettierPlugin from "eslint-plugin-prettier";
 import importPlugin from "eslint-plugin-import";
+import importSortPlugin from "eslint-plugin-simple-import-sort";
 
 export default [
     {
@@ -29,7 +30,7 @@ export default [
             "@typescript-eslint": tsPlugin,
             prettier: prettierPlugin,
             import: importPlugin,
-            "simple-import-sort":importSortPlugin,
+            "simple-import-sort": importSortPlugin ,
             },
         rules: {
             ...js.configs.recommended.rules,
@@ -44,9 +45,6 @@ export default [
             "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "req|res|next" }],
             "@typescript-eslint/return-await": ["error", "always"],
             "import/first": "error",
-            "import/newline-after-import": ["error", { count: 1 }],
-            "import/no-duplicates": "error",
-            "prettier/prettier": ["error"],
             "no-console": "warn",
         },
     },

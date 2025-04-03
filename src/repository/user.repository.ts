@@ -1,16 +1,15 @@
-import {IUser, IUserDTO} from "../interfaces/user.interface";
-import {User} from "../models/user.model";
-
+import { IUser, IUserDTO } from "../interfaces/user.interface";
+import { User } from "../models/user.model";
 
 class UserRepository {
-    public getAll ():Promise <IUser[]> {
-        return User.find ()
+    public getAll(): Promise<IUser[]> {
+        return User.find();
     }
-    public create (user: IUserDTO):Promise <IUser> {
-        return User.create(user)
+    public create(user: IUserDTO): Promise<IUser> {
+        return User.create(user);
     }
-    public getById (userId: String):Promise <IUser> {
-        return User.findById(userId)
+    public getById(userId: string): Promise<IUser> {
+        return User.findById(userId);
     }
 }
-export const userRepository = new UserRepository(); 
+export const userRepository = new UserRepository();
