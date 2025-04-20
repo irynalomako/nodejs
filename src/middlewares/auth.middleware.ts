@@ -1,9 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 
+import { RoleEnum } from "../enum/role.enum";
 import { StatusCodesEnum } from "../enum/status-codes.enum";
 import { ApiError } from "../error/api.error";
-import { IRefresh } from "../interfaces/token.interface";
+import { IRefresh, ITokenPayload } from "../interfaces/token.interface";
 import { tokenService } from "../services/token.service";
+import { userService } from "../services/user.service";
 class AuthMiddleware {
     public async checkAccessToken(
         req: Request,
@@ -45,6 +47,15 @@ class AuthMiddleware {
                     StatusCodesEnum.UNAUTHORIZED,
                 );
             }
+            //перевіряємо чи користувач є активним, в противному випадку забороняється логінація
+            const isActive = await userService.isActive(tokenPayload.userId);
+
+            if (!isActive) {
+                throw new ApiError(
+                    "Account is not active",
+                    StatusCodesEnum.FORBIDDEN,
+                );
+            }
             //зберігаємо токенпейлоад, щоб він був доступний не тільки в цій мідлварі
             //щоб зберегти дані, які будуть вжиті тільки один запит, використовуємо сховище:
             req.res.locals.tokenPayload = tokenPayload;
@@ -80,6 +91,21 @@ class AuthMiddleware {
                 throw new ApiError("Invalid token", StatusCodesEnum.FORBIDDEN);
             }
             res.locals.tokenPayload = tokenPayload;
+            next();
+        } catch (e) {
+            next(e);
+        }
+    }
+    public isAdmin(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { role } = req.res.locals.tokenPayload as ITokenPayload;
+
+            if (role !== RoleEnum.ADMIN) {
+                throw new ApiError(
+                    "Has no permission",
+                    StatusCodesEnum.FORBIDDEN,
+                );
+            }
             next();
         } catch (e) {
             next(e);
