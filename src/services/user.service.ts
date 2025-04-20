@@ -1,15 +1,51 @@
-import { IUser, IUserDTO } from "../interfaces/user.interface";
+import { StatusCodesEnum } from "../enum/status-codes.enum";
+import { ApiError } from "../error/api.error";
+import {
+    IUser,
+    IUserCreateDTO,
+    IUserUpdateDTO,
+} from "../interfaces/user.interface";
 import { userRepository } from "../repository/user.repository";
 
 class UserService {
     public getAll(): Promise<IUser[]> {
         return userRepository.getAll();
     }
-    public create(user: IUserDTO): Promise<IUser> {
+    public create(user: IUserCreateDTO): Promise<IUser> {
         return userRepository.create(user);
     }
-    public getById(userId: string): Promise<IUserDTO> {
-        return userRepository.getById(userId);
+    public async getById(userId: string): Promise<IUser> {
+        const user = await userRepository.getById(userId);
+        if (!user) {
+            throw new ApiError("User not found", StatusCodesEnum.NOT_FOUND);
+        }
+        return user;
+    }
+    public async updateById(
+        userId: string,
+        user: IUserUpdateDTO,
+    ): Promise<IUser> {
+        const data = await userRepository.getById(userId);
+        if (!data) {
+            throw new ApiError("User not found", StatusCodesEnum.NOT_FOUND);
+        }
+        return await userRepository.updateById(userId, user);
+    }
+    public async deleteById(userId: string): Promise<void> {
+        const data = await userRepository.getById(userId);
+        if (!data) {
+            throw new ApiError("User not found", StatusCodesEnum.NOT_FOUND);
+        }
+        await userRepository.deleteById(userId);
+    }
+    public async isEmailUnique(email: string): Promise<void> {
+        const user = await userRepository.getByEmail(email);
+        if (user) {
+            throw new ApiError(
+                "User is already exists",
+                StatusCodesEnum.BAD_REQUEST,
+            );
+        }
     }
 }
 export const userService = new UserService();
