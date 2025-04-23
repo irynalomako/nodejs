@@ -1,3 +1,4 @@
+import { templatesConstants } from "../constants/templates.constants";
 import { StatusCodesEnum } from "../enum/status-codes.enum";
 import { ApiError } from "../error/api.error";
 import { IAuth } from "../interfaces/auth.interface";
@@ -5,6 +6,7 @@ import { ITokenPair } from "../interfaces/token.interface";
 import { IUser, IUserCreateDTO } from "../interfaces/user.interface";
 import { tokenRepository } from "../repository/token.repository";
 import { userRepository } from "../repository/user.repository";
+import { emailService } from "./email.service";
 import { passwordService } from "./password.service";
 import { tokenService } from "./token.service";
 import { userService } from "./user.service";
@@ -25,6 +27,12 @@ class AuthService {
         });
         //зберігаємо токени в бд
         await tokenRepository.create({ ...tokens, _userId: newUser._id });
+        await emailService.sendMail(
+            newUser.email,
+            "Welcome",
+            templatesConstants.WELCOME,
+            { name: newUser.name },
+        );
         return { user: newUser, tokens };
     }
     public async singIn(
