@@ -1,4 +1,7 @@
-import { templatesConstants } from "../constants/templates.constants";
+import { config } from "../configs/config";
+import { emailConstants } from "../constants/email.constants";
+import { ActionTokenTypeEnum } from "../enum/action-token-type.enum";
+import { EmailEnum } from "../enum/email.enum";
 import { StatusCodesEnum } from "../enum/status-codes.enum";
 import { ApiError } from "../error/api.error";
 import { IAuth } from "../interfaces/auth.interface";
@@ -27,11 +30,17 @@ class AuthService {
         });
         //зберігаємо токени в бд
         await tokenRepository.create({ ...tokens, _userId: newUser._id });
+        const token = tokenService.generateActionToken(
+            { userId: newUser._id, role: newUser.role },
+            ActionTokenTypeEnum.ACTIVATE,
+        );
         await emailService.sendMail(
             newUser.email,
-            "Welcome",
-            templatesConstants.WELCOME,
-            { name: newUser.name },
+            emailConstants[EmailEnum.ACTIVATE],
+            {
+                name: newUser.name,
+                url: `${config.FRONTEND_URL}/activate/${token}`,
+            },
         );
         return { user: newUser, tokens };
     }
@@ -61,6 +70,44 @@ class AuthService {
         });
         await tokenRepository.create({ ...tokens, _userId: user._id });
         return { user, tokens };
+    }
+    public async activate(token: string): Promise<IUser> {
+        const { userId } = tokenService.verifyToken(
+            token,
+            ActionTokenTypeEnum.ACTIVATE,
+        );
+        //після перевірки токена повертаємо користувача з оновленою частинкою isActive
+        return await userService.updateById(userId, { isActive: true });
+    }
+    public async recoveryPasswordRequest(user: IUser): Promise<void> {
+        const token = tokenService.generateActionToken(
+            {
+                userId: user._id,
+                role: user.role,
+            },
+            ActionTokenTypeEnum.RECOVERY,
+        );
+        const url = `${config.FRONTEND_URL}/recovery/${token}`;
+        await emailService.sendMail(
+            user.email,
+            emailConstants[EmailEnum.RECOVERY],
+            {
+                url,
+            },
+        );
+    }
+    public async recoveryPassword(
+        token: string,
+        password: string,
+    ): Promise<IUser> {
+        const { userId } = tokenService.verifyToken(
+            token,
+            ActionTokenTypeEnum.RECOVERY,
+        );
+        const hashedPassword = await passwordService.hashPassword(password);
+        return await userService.updateById(userId, {
+            password: hashedPassword,
+        });
     }
 }
 export const authService = new AuthService();

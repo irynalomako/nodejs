@@ -16,7 +16,7 @@ const userSchema = new Schema(
         name: { type: String, required: true },
         surname: { type: String, required: true },
         age: { type: Number, required: true },
-        isActive: { type: Boolean, default: true },
+        isActive: { type: Boolean, default: false },
         //створюємо 2 додаткових поля (юзера не видаляють із бази, а тільки помічають на видалення)
         isDeleted: { type: Boolean, default: false },
         isVerified: { type: Boolean, default: false },

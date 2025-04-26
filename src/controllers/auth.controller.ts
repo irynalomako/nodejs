@@ -8,6 +8,7 @@ import { tokenRepository } from "../repository/token.repository";
 import { authService } from "../services/auth.service";
 import { tokenService } from "../services/token.service";
 import { userService } from "../services/user.service";
+
 class AuthController {
     public async signUp(req: Request, res: Response, next: NextFunction) {
         try {
@@ -47,6 +48,49 @@ class AuthController {
                 _userId: userId,
             });
             res.status(StatusCodesEnum.OK).json(tokens);
+        } catch (e) {
+            next(e);
+        }
+    }
+    public async activate(req: Request, res: Response, next: NextFunction) {
+        try {
+            //дістаємо з парамсів токен
+            const { token } = req.params;
+            const user = await authService.activate(token);
+            res.status(StatusCodesEnum.OK).json(user);
+        } catch (e) {
+            next(e);
+        }
+    }
+    public async passwordRecoveryRequest(
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ) {
+        try {
+            const { email } = req.body;
+            const user = await userService.getByEmail(email);
+
+            if (user) {
+                await authService.recoveryPasswordRequest(user);
+            }
+            res.status(StatusCodesEnum.OK).json({
+                details: "Check your email",
+            });
+        } catch (e) {
+            next(e);
+        }
+    }
+    public async recoveryPassword(
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ) {
+        try {
+            const { token } = req.params;
+            const { password } = req.body;
+            const user = await authService.recoveryPassword(token, password);
+            res.status(StatusCodesEnum.OK).json(user);
         } catch (e) {
             next(e);
         }

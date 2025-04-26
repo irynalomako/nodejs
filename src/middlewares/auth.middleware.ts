@@ -2,10 +2,12 @@ import { NextFunction, Request, Response } from "express";
 
 import { RoleEnum } from "../enum/role.enum";
 import { StatusCodesEnum } from "../enum/status-codes.enum";
+import { TokenTypeEnum } from "../enum/token-type.enum";
 import { ApiError } from "../error/api.error";
 import { IRefresh, ITokenPayload } from "../interfaces/token.interface";
 import { tokenService } from "../services/token.service";
 import { userService } from "../services/user.service";
+
 class AuthMiddleware {
     public async checkAccessToken(
         req: Request,
@@ -35,11 +37,11 @@ class AuthMiddleware {
             //верифікуємо токен і повертаємо пейлоад
             const tokenPayload = tokenService.verifyToken(
                 accessToken,
-                "access",
+                TokenTypeEnum.ACCESS,
             );
             const isTokenExist = await tokenService.isTokenExists(
                 accessToken,
-                "accessToken",
+                TokenTypeEnum.ACCESS,
             );
             if (!isTokenExist) {
                 throw new ApiError(
@@ -81,11 +83,11 @@ class AuthMiddleware {
             }
             const tokenPayload = tokenService.verifyToken(
                 refreshToken,
-                "refresh",
+                TokenTypeEnum.REFRESH,
             );
             const isTokenExist = tokenService.isTokenExists(
                 refreshToken,
-                "refreshToken",
+                TokenTypeEnum.REFRESH,
             );
             if (!isTokenExist) {
                 throw new ApiError("Invalid token", StatusCodesEnum.FORBIDDEN);
