@@ -33,6 +33,7 @@ const bdConnection = async () => {
             console.log("Connecting to DB...");
             await mongoose.connect(config.MONGO_URI);
             dbCon = true;
+            console.log("Database available!!!");
         } catch (e) {
             console.log("Database unavailable, wait 3 seconds");
             await new Promise((resolve) => setTimeout(resolve, 3000));
